@@ -43,7 +43,7 @@ export class OrdersController {
 	@ApiBearerAuth()
 	@ApiOperation({ summary: '주문 내역 조회' })
 	@ApiQuery({
-		name: 'userId',
+		name: 'user_id',
 		description: '사용자 ID',
 		example: 1,
 	})
@@ -54,7 +54,7 @@ export class OrdersController {
 			example: [{ orderId: 1, product: '상품A' }],
 		},
 	})
-	async findByUserId(@Query('userId', ParseIntPipe) user_id: number) {
+	async findByUserId(@Query('user_id', ParseIntPipe) user_id: number) {
 		return this.ordersService.findByUserId(user_id);
 	}
 }
