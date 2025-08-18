@@ -5,8 +5,15 @@ import {
 	Body,
 	Param,
 	ParseIntPipe,
+	UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+	ApiTags,
+	ApiOperation,
+	ApiResponse,
+	ApiBearerAuth,
+} from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ChargePointDto } from './dto/charge-point.dto';
@@ -30,6 +37,8 @@ export class UsersController {
 	}
 
 	@Get(':id')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: '회원 조회' })
 	@ApiResponse({
 		status: 200,
@@ -43,6 +52,8 @@ export class UsersController {
 	}
 
 	@Post(':id/points')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: '포인트 충전' })
 	@ApiResponse({
 		status: 200,
