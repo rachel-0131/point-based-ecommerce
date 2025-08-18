@@ -5,8 +5,16 @@ import {
 	Body,
 	Query,
 	ParseIntPipe,
+	UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import {
+	ApiTags,
+	ApiOperation,
+	ApiResponse,
+	ApiQuery,
+	ApiBearerAuth,
+} from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 
@@ -16,6 +24,8 @@ export class OrdersController {
 	constructor(private readonly ordersService: OrdersService) {}
 
 	@Post()
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: '상품 구매' })
 	@ApiResponse({
 		status: 201,
@@ -29,6 +39,8 @@ export class OrdersController {
 	}
 
 	@Get()
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: '주문 내역 조회' })
 	@ApiQuery({
 		name: 'userId',
