@@ -1,8 +1,12 @@
 import { Controller, Post, Body } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import {
+	StandardApiResponse,
+	ErrorApiResponse,
+} from '../common/decorators/api-response.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -11,29 +15,18 @@ export class AuthController {
 
 	@Post('register')
 	@ApiOperation({ summary: '회원 가입' })
-	@ApiResponse({
-		status: 201,
-		description: '회원 가입 성공',
-		schema: {
-			example: { id: 1, email: 'user@example.com', name: '홍길동' },
-		},
-	})
+	@StandardApiResponse(201, '회원 가입 성공')
+	@ErrorApiResponse(409, '이미 존재하는 이메일')
+	@ErrorApiResponse(400, '잘못된 요청 데이터')
 	async register(@Body() registerDto: RegisterDto) {
 		return this.authService.register(registerDto);
 	}
 
 	@Post('login')
 	@ApiOperation({ summary: '로그인' })
-	@ApiResponse({
-		status: 200,
-		description: '로그인 성공',
-		schema: {
-			example: {
-				accessToken: 'jwt-token',
-				user: { id: 1, email: 'user@example.com', name: '홍길동' },
-			},
-		},
-	})
+	@StandardApiResponse(200, '로그인 성공')
+	@ErrorApiResponse(401, '이메일 또는 비밀번호가 올바르지 않음')
+	@ErrorApiResponse(400, '잘못된 요청 데이터')
 	async login(@Body() loginDto: LoginDto) {
 		return this.authService.login(loginDto);
 	}
