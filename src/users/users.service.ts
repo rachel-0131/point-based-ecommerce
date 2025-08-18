@@ -55,7 +55,7 @@ export class UsersService {
 		return user;
 	}
 
-	async charge_point(user_id: number, charge_point_dto: ChargePointDto) {
+	async chargePoint(user_id: number, charge_point_dto: ChargePointDto) {
 		const user = await this.prisma.user.findUnique({
 			where: { id: user_id },
 		});
@@ -76,7 +76,7 @@ export class UsersService {
 
 			await tx.pointHistory.create({
 				data: {
-					user_id,
+					user_id: user_id,
 					amount: charge_point_dto.amount,
 					type: PointType.CHARGE,
 					description: '포인트 충전',
