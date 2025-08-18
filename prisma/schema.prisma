@@ -8,27 +8,27 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  name      String
-  point     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  password   String
+  name       String
+  point      Int      @default(0)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  orders           Order[]
-  pointHistories   PointHistory[]
+  orders          Order[]
+  point_histories PointHistory[]
 
   @@map("users")
 }
 
 model Product {
-  id        Int      @id @default(autoincrement())
-  name      String
-  price     Int
-  stock     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         Int      @id @default(autoincrement())
+  name       String
+  price      Int
+  stock      Int      @default(0)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   orders Order[]
 
@@ -36,32 +36,32 @@ model Product {
 }
 
 model Order {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  productId Int
-  quantity  Int      @default(1)
-  totalPrice Int
-  createdAt DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  product_id  Int
+  quantity    Int      @default(1)
+  total_price Int
+  created_at  DateTime @default(now())
 
-  user    User    @relation(fields: [userId], references: [id])
-  product Product @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [user_id], references: [id])
+  product Product @relation(fields: [product_id], references: [id])
 
-  @@index([userId])
-  @@index([productId])
+  @@index([user_id])
+  @@index([product_id])
   @@map("orders")
 }
 
 model PointHistory {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  amount    Int
-  type      PointType
+  id          Int       @id @default(autoincrement())
+  user_id     Int
+  amount      Int
+  type        PointType
   description String?
-  createdAt DateTime @default(now())
+  created_at  DateTime  @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [user_id], references: [id])
 
-  @@index([userId])
+  @@index([user_id])
   @@map("point_histories")
 }
 
