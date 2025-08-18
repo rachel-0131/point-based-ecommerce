@@ -22,7 +22,7 @@ export class UsersController {
     status: 201, 
     description: '회원 가입 성공',
     schema: {
-      example: { id: 1, name: '홍길동' }
+      example: { id: 1, email: 'user@example.com', name: '홍길동' }
     }
   })
   async create(@Body() createUserDto: CreateUserDto) {
