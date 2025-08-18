@@ -8,7 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-	constructor(private jwtService: JwtService) {
+	constructor(private jwt_service: JwtService) {
 		super();
 	}
 
@@ -21,9 +21,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 		}
 
 		try {
-			const payload = this.jwtService.verify(token);
+			const payload = this.jwt_service.verify(token);
 			request['user'] = payload;
-		} catch {
+		} catch (error) {
+			if (error.name === 'TokenExpiredError') {
+				throw new UnauthorizedException('토큰이 만료되었습니다');
+			}
 			throw new UnauthorizedException('유효하지 않은 토큰입니다');
 		}
 
