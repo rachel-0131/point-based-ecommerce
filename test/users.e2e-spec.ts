@@ -5,6 +5,7 @@ import { UsersController } from '../src/users/users.controller';
 import { UsersService } from '../src/users/users.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { JwtAuthGuard } from '../src/auth/guards/jwt-auth.guard';
+import { PointType } from '@prisma/client';
 
 describe('UsersController (e2e)', () => {
   let app: INestApplication;
@@ -18,6 +19,7 @@ describe('UsersController (e2e)', () => {
       create: jest.fn(),
       findOne: jest.fn(),
       chargePoint: jest.fn(),
+      getPointHistory: jest.fn(),
     } as any;
 
     // Mock PrismaService
@@ -349,6 +351,71 @@ describe('UsersController (e2e)', () => {
         .expect((res) => {
           expect(res.body.message).toContain('Validation failed');
           expect(mock_usersService.chargePoint).not.toHaveBeenCalled();
+        });
+    });
+  });
+
+  describe('/users/:id/point-history (GET)', () => {
+    it('should return point history successfully', () => {
+      const mock_history = [
+        {
+          id: 1,
+          amount: 1000,
+          type: PointType.CHARGE,
+          description: '포인트 충전',
+          created_at: new Date('2025-08-19T12:00:00.000Z'),
+        },
+        {
+          id: 2,
+          amount: -500,
+          type: PointType.USE,
+          description: '상품 구매 (주문 ID: 1)',
+          created_at: new Date('2025-08-19T12:30:00.000Z'),
+        },
+      ];
+
+      mock_usersService.getPointHistory.mockResolvedValue(mock_history);
+
+      return request(app.getHttpServer())
+        .get('/users/1/point-history')
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toHaveLength(2);
+          expect(res.body[0]).toMatchObject({
+            id: 1,
+            amount: 1000,
+            type: 'CHARGE',
+            description: '포인트 충전',
+          });
+          expect(res.body[1]).toMatchObject({
+            id: 2,
+            amount: -500,
+            type: 'USE',
+            description: '상품 구매 (주문 ID: 1)',
+          });
+          expect(mock_usersService.getPointHistory).toHaveBeenCalledWith(1);
+        });
+    });
+
+    it('should fail when user id is invalid', () => {
+      return request(app.getHttpServer())
+        .get('/users/abc/point-history')
+        .expect(400)
+        .expect((res) => {
+          expect(res.body.message).toContain('Validation failed');
+          expect(mock_usersService.getPointHistory).not.toHaveBeenCalled();
+        });
+    });
+
+    it('should return empty array for user with no history', () => {
+      mock_usersService.getPointHistory.mockResolvedValue([]);
+
+      return request(app.getHttpServer())
+        .get('/users/999/point-history')
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toEqual([]);
+          expect(mock_usersService.getPointHistory).toHaveBeenCalledWith(999);
         });
     });
   });

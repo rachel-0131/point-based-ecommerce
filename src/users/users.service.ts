@@ -88,4 +88,29 @@ export class UsersService {
 
 		return { point: result.point };
 	}
+
+	async getPointHistory(user_id: number) {
+		const user = await this.prisma.user.findUnique({
+			where: { id: user_id },
+		});
+
+		if (!user) {
+			throw new NotFoundException(`User with ID ${user_id} not found`);
+		}
+
+		const history = await this.prisma.pointHistory.findMany({
+			where: { user_id },
+			orderBy: {
+				created_at: 'desc',
+			},
+		});
+
+		return history.map((item) => ({
+			id: item.id,
+			amount: item.amount,
+			type: item.type,
+			description: item.description,
+			created_at: item.created_at,
+		}));
+	}
 }

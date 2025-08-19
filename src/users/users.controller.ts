@@ -68,4 +68,34 @@ export class UsersController {
 	) {
 		return this.usersService.chargePoint(id, chargePointDto);
 	}
+
+	@Get(':id/point-history')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: '포인트 내역 조회' })
+	@ApiResponse({
+		status: 200,
+		description: '포인트 내역 조회 성공',
+		schema: {
+			example: [
+				{
+					id: 1,
+					amount: 1000,
+					type: 'CHARGE',
+					description: '포인트 충전',
+					created_at: '2025-08-19T12:00:00.000Z',
+				},
+				{
+					id: 2,
+					amount: -500,
+					type: 'USE',
+					description: '상품 구매 (주문 ID: 1)',
+					created_at: '2025-08-19T12:30:00.000Z',
+				},
+			],
+		},
+	})
+	async getPointHistory(@Param('id', ParseIntPipe) id: number) {
+		return this.usersService.getPointHistory(id);
+	}
 }
