@@ -87,7 +87,7 @@ export class OrdersService {
 			return order;
 		});
 
-		return { orderId: result.id };
+		return { order_id: result.id };
 	}
 
 	async findByUserId(user_id: number) {
@@ -106,7 +106,7 @@ export class OrdersService {
 		});
 
 		return orders.map((order) => ({
-			orderId: order.id,
+			order_id: order.id,
 			product: order.product.name,
 		}));
 	}
