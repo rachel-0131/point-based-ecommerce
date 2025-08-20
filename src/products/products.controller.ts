@@ -22,7 +22,7 @@ export class ProductsController {
 		status: 200,
 		description: '상품 목록 조회 성공',
 		schema: {
-			example: [{ id: 1, name: 'A', price: 1000 }],
+			example: [{ id: 1, name: 'A', price: 1000, stock: 100 }],
 		},
 	})
 	async findAll() {
@@ -35,7 +35,7 @@ export class ProductsController {
 		status: 200,
 		description: '상품 단건 조회 성공',
 		schema: {
-			example: { id: 1, name: 'A', price: 1000 },
+			example: { id: 1, name: 'A', price: 1000, stock: 100 },
 		},
 	})
 	async findOne(@Param('id', ParseIntPipe) id: number) {

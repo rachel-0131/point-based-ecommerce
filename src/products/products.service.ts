@@ -20,13 +20,22 @@ export class ProductsService {
 	}
 
 	async findAll() {
-		return this.prisma.product.findMany({
+		const products = await this.prisma.product.findMany({
 			select: {
 				id: true,
 				name: true,
 				price: true,
+				stock: true,
+			},
+			orderBy: {
+				id: 'desc', // 최근 등록된 상품이 먼저 나오도록 정렬
 			},
 		});
+
+		return products.map((product) => ({
+			...product,
+			is_sold_out: product.stock <= 0, // 품절 여부 추가
+		}));
 	}
 
 	async findOne(id: number) {
@@ -36,13 +45,18 @@ export class ProductsService {
 				id: true,
 				name: true,
 				price: true,
+				stock: true,
 			},
 		});
 
+		// 상품이 존재하지 않는 경우 예외 처리
 		if (!product) {
 			throw new NotFoundException(`Product with ID ${id} not found`);
 		}
 
-		return product;
+		return {
+			...product,
+			is_sold_out: product.stock <= 0, // 품절 여부 추가
+		};
 	}
 }
