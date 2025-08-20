@@ -43,6 +43,7 @@ export class UsersService {
 			where: { id },
 			select: {
 				id: true,
+				email: true,
 				name: true,
 				point: true,
 			},
@@ -112,5 +113,16 @@ export class UsersService {
 			description: item.description,
 			created_at: item.created_at,
 		}));
+	}
+
+	async findByEmail(email: string) {
+		return this.prisma.user.findUnique({
+			where: { email },
+			select: {
+				id: true,
+				email: true,
+				name: true,
+			},
+		});
 	}
 }

@@ -20,6 +20,7 @@ describe('UsersController (e2e)', () => {
       findOne: jest.fn(),
       chargePoint: jest.fn(),
       getPointHistory: jest.fn(),
+      findByEmail: jest.fn(),
     } as any;
 
     // Mock PrismaService
@@ -27,7 +28,11 @@ describe('UsersController (e2e)', () => {
 
     // Mock JwtAuthGuard to bypass authentication for testing
     mockJwtAuthGuard = {
-      canActivate: jest.fn().mockReturnValue(true),
+      canActivate: jest.fn().mockImplementation((context) => {
+        const request = context.switchToHttp().getRequest();
+        request.user = { id: 1 }; // Mock user data
+        return true;
+      }),
     };
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -222,6 +227,7 @@ describe('UsersController (e2e)', () => {
     it('should return user information successfully', () => {
       const mock_user = {
         id: 1,
+        email: 'user@example.com',
         name: '홍길동',
         point: 1000,
       };
@@ -250,6 +256,7 @@ describe('UsersController (e2e)', () => {
     it('should handle negative id (ParseIntPipe allows it)', () => {
       const mock_user = {
         id: -1,
+        email: 'test@example.com',
         name: '테스트유저',
         point: 1000,
       };
@@ -417,6 +424,43 @@ describe('UsersController (e2e)', () => {
           expect(res.body).toEqual([]);
           expect(mock_usersService.getPointHistory).toHaveBeenCalledWith(999);
         });
+    });
+  });
+
+  describe('/users/profile (GET)', () => {
+    it('should return user profile successfully', () => {
+      const mock_user = {
+        id: 1,
+        email: 'user@example.com',
+        name: '홍길동',
+        point: 1500,
+      };
+
+      // Mock JwtAuthGuard의 request.user를 시뮬레이션
+      const mockRequest = {
+        user: { id: 1 },
+      };
+
+      mock_usersService.findOne.mockResolvedValue(mock_user);
+
+      return request(app.getHttpServer())
+        .get('/users/profile')
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toEqual(mock_user);
+        });
+    });
+
+    it('should fail when user is not found', () => {
+      const mockRequest = {
+        user: { id: 999 },
+      };
+
+      mock_usersService.findOne.mockRejectedValue(
+        new Error('User with ID 999 not found'),
+      );
+
+      return request(app.getHttpServer()).get('/users/profile').expect(500);
     });
   });
 });

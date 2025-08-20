@@ -14,6 +14,7 @@ import {
 	ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ChargePointDto } from './dto/charge-point.dto';
@@ -97,5 +98,25 @@ export class UsersController {
 	})
 	async getPointHistory(@Param('id', ParseIntPipe) id: number) {
 		return this.usersService.getPointHistory(id);
+	}
+
+	@Get('profile')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: '프로필 조회' })
+	@ApiResponse({
+		status: 200,
+		description: '프로필 조회 성공',
+		schema: {
+			example: {
+				id: 1,
+				email: 'user@example.com',
+				name: '홍길동',
+				point: 1500,
+			},
+		},
+	})
+	async getProfile(@CurrentUser() user: any) {
+		return this.usersService.findOne(user.id);
 	}
 }
