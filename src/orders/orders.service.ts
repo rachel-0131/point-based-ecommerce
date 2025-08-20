@@ -1,48 +1,63 @@
-import {
-	Injectable,
-	NotFoundException,
-	BadRequestException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { PointType } from '@prisma/client';
+import {
+	InsufficientPointsException,
+	InsufficientStockException,
+	UserNotFoundException,
+	ProductNotFoundException,
+} from './exceptions/order.exceptions';
 
 @Injectable()
 export class OrdersService {
 	constructor(private readonly prisma: PrismaService) {}
 
+	// 상품 구매 (주문 생성)
 	async create(create_order_dto: CreateOrderDto) {
-		const user = await this.prisma.user.findUnique({
-			where: { id: create_order_dto.user_id },
-		});
-
-		if (!user) {
-			throw new NotFoundException(`사용자를 찾을 수 없습니다`);
-		}
-
-		const product = await this.prisma.product.findUnique({
-			where: { id: create_order_dto.product_id },
-		});
-
-		if (!product) {
-			throw new NotFoundException(`상품을 찾을 수 없습니다`);
-		}
-
-		const quantity = create_order_dto.quantity || 1;
-		const total_price = product.price * quantity;
-
-		if (user.point < total_price) {
-			throw new BadRequestException('포인트가 부족합니다');
-		}
-
 		const result = await this.prisma.$transaction(async (tx) => {
-			// 트랜잭션 내에서 재고를 확인해서 race condition 방지
-			const current_product = await tx.product.findUnique({
-				where: { id: product.id },
+			// 트랜잭션 내에서 사용자 조회 (최신 포인트 잔액 확보)
+			const user = await tx.user.findUnique({
+				where: { id: create_order_dto.user_id },
 			});
 
-			if (current_product.stock < quantity) {
-				throw new BadRequestException('해당 상품의 재고가 부족합니다');
+			if (!user) {
+				throw new UserNotFoundException();
+			}
+
+			// 트랜잭션 내에서 상품 조회 (최신 재고 확보)
+			const product = await tx.product.findUnique({
+				where: { id: create_order_dto.product_id },
+			});
+
+			if (!product) {
+				throw new ProductNotFoundException();
+			}
+
+			const quantity = create_order_dto.quantity || 1;
+			const total_price = product.price * quantity;
+
+			// 트랜잭션 내에서 포인트 검증
+			if (user.point < total_price) {
+				throw new InsufficientPointsException();
+			}
+
+			// 재고 검증과 동시에 원자적 업데이트
+			const updatedProduct = await tx.product.updateMany({
+				where: {
+					id: create_order_dto.product_id,
+					stock: { gte: quantity },
+				},
+				data: {
+					stock: {
+						decrement: quantity,
+					},
+				},
+			});
+
+			// 업데이트된 행이 없으면 재고 부족
+			if (updatedProduct.count === 0) {
+				throw new InsufficientStockException();
 			}
 
 			// 사용자 포인트 차감
@@ -54,21 +69,6 @@ export class OrdersService {
 					},
 				},
 			});
-
-			// 상품 재고 차감
-			const updated_product = await tx.product.update({
-				where: { id: create_order_dto.product_id },
-				data: {
-					stock: {
-						decrement: quantity,
-					},
-				},
-			});
-
-			// 차감 후 음수 재고가 발생하는지 예외 처리
-			if (updated_product.stock < 0) {
-				throw new BadRequestException('해당 상품의 재고가 부족합니다');
-			}
 
 			// 주문 생성
 			const order = await tx.order.create({
@@ -96,6 +96,7 @@ export class OrdersService {
 		return { order_id: result.id };
 	}
 
+	// 유저 아이디로 주문 내역 조회
 	async findByUserId(user_id: number) {
 		const orders = await this.prisma.order.findMany({
 			where: { user_id },
