@@ -31,7 +31,7 @@ export class OrdersController {
 		status: 201,
 		description: '상품 구매 성공',
 		schema: {
-			example: { orderId: 1 },
+			example: { order_id: 1 },
 		},
 	})
 	async create(@Body() create_order_dto: CreateOrderDto) {
@@ -51,7 +51,7 @@ export class OrdersController {
 		status: 200,
 		description: '주문 내역 조회 성공',
 		schema: {
-			example: [{ orderId: 1, product: '상품A' }],
+			example: [{ order_id: 1, product: '상품A' }],
 		},
 	})
 	async findByUserId(@Query('user_id', ParseIntPipe) user_id: number) {
