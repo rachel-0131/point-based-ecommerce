@@ -6,24 +6,24 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=mysql://root:password@db:3306/point_ecommerce
-      - JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-      - PORT=3000
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD:-password}@db:3306/${MYSQL_DATABASE:-point_ecommerce}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production}
+      - PORT=${PORT:-3000}
     depends_on:
       db:
         condition: service_healthy
     volumes:
       - .:/app
       - /app/node_modules
-    command: npm run start:dev
+    command: sh -c "npx prisma migrate deploy && npm run start:dev"
 
   db:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: point_ecommerce
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-password}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-point_ecommerce}
     ports:
-      - "3306:3306"
+      - "3306:3306"  # 개발용: 외부 접근 허용 (프로덕션에서는 제거 권장)
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:

@@ -1,112 +1,118 @@
-# 포인트 기반 E-commerce API
+# 포인트 기반 이커머스 시스템
 
-## 주요 기능
+포인트를 활용한 이커머스 시스템으로 사용자는 포인트를 충전하여 상품을 구매할 수 있습니다.
 
-### 사용자 관리
-- 회원가입/로그인: JWT 기반 인증 시스템
-- 포인트 충전: 사용자 포인트 충전 기능
-- 포인트 내역 조회: 충전/사용 내역 확인
+## 설치 및 실행
 
-### 상품 관리
-- 상품 조회: 전체 상품 목록 및 상세 정보 조회
-- 관리자 상품 관리: 상품 등록, 수정, 삭제 (관리자 전용)
-- 재고 관리: 실시간 재고 수량 관리
+### 설치 요구사항
 
-### 주문 관리
-- 상품 주문: 포인트를 사용한 상품 구매
-- 주문 내역: 사용자별 주문 내역 조회
-- 재고 차감: 주문 시 자동 재고 차감
+- Node.js (v18 이상)
+- Docker & Docker Compose
 
-## 기술 스택
+### 1. 프로젝트 클론
 
-- 프레임워크: NestJS
-- 데이터베이스: MySQL
-- ORM: Prisma
-- 인증: JWT (Passport)
-- 유효성 검사: class-validator, class-transformer
-- API 문서화: Swagger
-- 테스트: Jest
+```bash
+git clone <repository-url>
+cd point-based-ecommerce
+```
 
-## API 문서
+### 2. Docker Compose로 실행 (권장)
 
-서버 실행 후 `http://localhost:3000/api` 에서 Swagger 문서를 확인할 수 있습니다.
+#### 기본 실행 (기본 설정 사용)
 
-### 주요 API 엔드포인트
+```bash
+# Docker Compose로 전체 서비스 실행
+docker-compose up --build
+```
 
-#### 인증
-- `POST /auth/register` - 회원가입
-- `POST /auth/login` - 로그인
+환경 변수 설정이 필요합니다.
+```bash
+# 1. .env.example을 복사해 .env 생성
+cp .env.example .env
 
-#### 사용자
-- `GET /users/profile` - 프로필 조회
-- `POST /users/charge-point` - 포인트 충전
-- `GET /users/point-history` - 포인트 내역 조회
+# 2. .env 파일을 열어서 패스워드 변경
+# MYSQL_ROOT_PASSWORD=password
+# JWT_SECRET=jwt
 
-#### 상품
-- `GET /products` - 상품 목록 조회
-- `GET /products/:id` - 상품 상세 조회
-- `POST /admin/products` - 상품 등록 (관리자)
-- `PUT /admin/products/:id` - 상품 수정 (관리자)
-- `DELETE /admin/products/:id` - 상품 삭제 (관리자)
+# 3. Docker Compose 실행
+docker-compose up --build
 
-#### 주문
-- `POST /orders` - 상품 주문
-- `GET /orders` - 주문 내역 조회
+# 또는 환경 변수로 직접 설정
+MYSQL_ROOT_PASSWORD=password docker-compose up --build
 
-## 실행 방법
+# 백그라운드에서 실행 (데몬 모드)
+docker-compose up -d --build
+```
 
-### Docker Compose 사용 (권장)
+위 명령어로 다음을 자동으로 수행합니다:
+- MySQL 8.0 데이터베이스 컨테이너 실행
+- Node.js 애플리케이션 빌드 및 실행
+- 데이터베이스 스키마 자동 생성 (마이그레이션 포함)
+- 환경 변수 기반 설정 적용
 
-1. 리포지토리 클론
-   ```bash
-   git clone <repository-url>
-   cd point-based-ecommerce
-   ```
+#### Docker 서비스 종료
+```bash
+# 컨테이너 중지
+docker-compose down
 
-2. Docker Compose로 실행
-   ```bash
-   docker-compose up -d
-   ```
+# 컨테이너 중지 + 볼륨 삭제 (데이터베이스 데이터 삭제됨)
+docker-compose down -v
 
-3. 데이터베이스 마이그레이션
-   ```bash
-   docker-compose exec app npx prisma migrate deploy
-   ```
+# 컨테이너 중지 + 이미지 삭제
+docker-compose down --rmi all
+```
 
-4. 애플리케이션 접속
-   - API: http://localhost:3000
-   - Swagger 문서: http://localhost:3000/api
 
-### 로컬 개발 환경
+### 3. 로컬 환경에서 실행
 
-1. 의존성 설치
-   ```bash
-   npm install
-   ```
+#### 3.1 데이터베이스 설정
 
-2. 환경 변수 설정
-   ```bash
-   cp .env.example .env
-   # .env 파일을 열어 데이터베이스 연결 정보 등을 수정
-   ```
+**옵션 1: Docker로 MySQL만 실행**
+```bash
+# MySQL 컨테이너만 실행
+docker-compose up db -d
+```
 
-3. MySQL 데이터베이스 준비
-   ```bash
-   # MySQL 서버 실행 후 데이터베이스 생성
-   mysql -u root -p
-   CREATE DATABASE point_ecommerce;
-   ```
+**옵션 2: 로컬 MySQL 사용**
+- MySQL 8.0 설치 및 실행
+- 데이터베이스 생성:
+```sql
+CREATE DATABASE point_ecommerce;
+```
 
-4. Prisma 마이그레이션
-   ```bash
-   npx prisma migrate deploy
-   npx prisma generate
-   ```
+#### 3.2 환경 변수 설정
 
-5. 개발 서버 실행
-   ```bash
-   npm run start:dev
-   ```
+프로젝트 루트에 `.env` 파일을 생성하고 다음 내용을 추가합니다:
+
+```env
+DATABASE_URL="mysql://root:password@localhost:3306/point_ecommerce"
+JWT_SECRET="jwt-key"
+PORT=3000
+```
+
+#### 3.3 의존성 설치 및 데이터베이스 초기화
+
+```bash
+# 의존성 설치
+npm install
+
+# Prisma 클라이언트 생성
+npx prisma generate
+
+# 데이터베이스 마이그레이션 적용
+npx prisma migrate deploy
+```
+
+#### 3.4 애플리케이션 실행
+
+```bash
+# 개발 모드로 실행 (자동 재시작)
+npm run start:dev
+
+# 또는 프로덕션 빌드 후 실행
+npm run build
+npm run start:prod
+```
 
 ## 테스트
 
@@ -144,16 +150,9 @@ src/
     └── interfaces/ # 인터페이스 정의
 ```
 
-## 개발 가이드
+## 컨벤션
 
-### 코드 스타일
 ```bash
 npm run lint          # ESLint 실행
 npm run format        # Prettier 포매팅
-```
-
-### 빌드
-```bash
-npm run build         # 프로덕션 빌드
-npm run start:prod    # 프로덕션 모드 실행
 ```
