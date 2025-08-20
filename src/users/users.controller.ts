@@ -14,6 +14,7 @@ import {
 	ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ChargePointDto } from './dto/charge-point.dto';
@@ -67,5 +68,55 @@ export class UsersController {
 		@Body() chargePointDto: ChargePointDto,
 	) {
 		return this.usersService.chargePoint(id, chargePointDto);
+	}
+
+	@Get(':id/point-history')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: '포인트 내역 조회' })
+	@ApiResponse({
+		status: 200,
+		description: '포인트 내역 조회 성공',
+		schema: {
+			example: [
+				{
+					id: 1,
+					amount: 1000,
+					type: 'CHARGE',
+					description: '포인트 충전',
+					created_at: '2025-08-19T12:00:00.000Z',
+				},
+				{
+					id: 2,
+					amount: -500,
+					type: 'USE',
+					description: '상품 구매 (주문 ID: 1)',
+					created_at: '2025-08-19T12:30:00.000Z',
+				},
+			],
+		},
+	})
+	async getPointHistory(@Param('id', ParseIntPipe) id: number) {
+		return this.usersService.getPointHistory(id);
+	}
+
+	@Get('profile')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: '프로필 조회' })
+	@ApiResponse({
+		status: 200,
+		description: '프로필 조회 성공',
+		schema: {
+			example: {
+				id: 1,
+				email: 'user@example.com',
+				name: '홍길동',
+				point: 1500,
+			},
+		},
+	})
+	async getProfile(@CurrentUser() user: any) {
+		return this.usersService.findOne(user.id);
 	}
 }
