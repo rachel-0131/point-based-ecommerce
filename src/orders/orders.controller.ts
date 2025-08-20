@@ -6,6 +6,7 @@ import {
 	Query,
 	ParseIntPipe,
 	UseGuards,
+	ForbiddenException,
 } from '@nestjs/common';
 import {
 	ApiTags,
@@ -15,8 +16,10 @@ import {
 	ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { ORDER_ERROR_MESSAGES } from './constants/error-messages.constants';
 
 @ApiTags('orders')
 @Controller('orders')
@@ -54,7 +57,13 @@ export class OrdersController {
 			example: [{ order_id: 1, product: '상품A' }],
 		},
 	})
-	async findByUserId(@Query('user_id', ParseIntPipe) user_id: number) {
+	async findByUserId(
+		@Query('user_id', ParseIntPipe) user_id: number,
+		@CurrentUser() user: any,
+	) {
+		if (user.id !== user_id) {
+			throw new ForbiddenException(ORDER_ERROR_MESSAGES.ORDER_ACCESS_DENIED);
+		}
 		return this.ordersService.findByUserId(user_id);
 	}
 }
