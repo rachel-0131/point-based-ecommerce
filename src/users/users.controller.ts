@@ -6,6 +6,7 @@ import {
 	Param,
 	ParseIntPipe,
 	UseGuards,
+	Query,
 } from '@nestjs/common';
 import {
 	ApiTags,
@@ -18,6 +19,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ChargePointDto } from './dto/charge-point.dto';
+import { OffsetPaginationDto } from '../common/dto/offset-pagination.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -33,8 +35,8 @@ export class UsersController {
 			example: { id: 1, email: 'user@example.com', name: '홍길동' },
 		},
 	})
-	async create(@Body() createUserDto: CreateUserDto) {
-		return this.usersService.create(createUserDto);
+	async create(@Body() dto: CreateUserDto) {
+		return this.usersService.create(dto);
 	}
 
 	@Get('profile')
@@ -85,9 +87,9 @@ export class UsersController {
 	})
 	async chargePoint(
 		@Param('id', ParseIntPipe) id: number,
-		@Body() chargePointDto: ChargePointDto,
+		@Body() dto: ChargePointDto,
 	) {
-		return this.usersService.chargePoint(id, chargePointDto);
+		return this.usersService.chargePoint(id, dto);
 	}
 
 	@Get(':id/point-history')
@@ -98,25 +100,38 @@ export class UsersController {
 		status: 200,
 		description: '포인트 내역 조회 성공',
 		schema: {
-			example: [
-				{
-					id: 1,
-					amount: 1000,
-					type: 'CHARGE',
-					description: '포인트 충전',
-					created_at: '2025-08-19T12:00:00.000Z',
+			example: {
+				success: true,
+				data: [
+					{
+						id: 1,
+						amount: 1000,
+						type: 'CHARGE',
+						description: '포인트 충전',
+						created_at: '2025-08-19T12:00:00.000Z',
+					},
+					{
+						id: 2,
+						amount: -500,
+						type: 'USE',
+						description: '상품 구매 (주문 ID: 1)',
+						created_at: '2025-08-19T12:30:00.000Z',
+					},
+				],
+				pagination: {
+					page: 1,
+					limit: 10,
+					total: 2,
+					total_pages: 1,
 				},
-				{
-					id: 2,
-					amount: -500,
-					type: 'USE',
-					description: '상품 구매 (주문 ID: 1)',
-					created_at: '2025-08-19T12:30:00.000Z',
-				},
-			],
+				timestamp: '2025-08-21T00:00:00.000Z',
+			},
 		},
 	})
-	async getPointHistory(@Param('id', ParseIntPipe) id: number) {
-		return this.usersService.getPointHistory(id);
+	async getPointHistory(
+		@Param('id', ParseIntPipe) id: number,
+		@Query() dto: OffsetPaginationDto,
+	) {
+		return this.usersService.getPointHistory(id, dto);
 	}
 }

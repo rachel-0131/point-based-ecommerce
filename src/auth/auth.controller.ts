@@ -18,8 +18,8 @@ export class AuthController {
 	@StandardApiResponse(201, '회원 가입 성공')
 	@ErrorApiResponse(409, '이미 존재하는 이메일')
 	@ErrorApiResponse(400, '잘못된 요청 데이터')
-	async register(@Body() registerDto: RegisterDto) {
-		return this.authService.register(registerDto);
+	async register(@Body() dto: RegisterDto) {
+		return this.authService.register(dto);
 	}
 
 	@Post('login')
@@ -27,7 +27,7 @@ export class AuthController {
 	@StandardApiResponse(200, '로그인 성공')
 	@ErrorApiResponse(401, '이메일 또는 비밀번호가 올바르지 않음')
 	@ErrorApiResponse(400, '잘못된 요청 데이터')
-	async login(@Body() loginDto: LoginDto) {
-		return this.authService.login(loginDto);
+	async login(@Body() dto: LoginDto) {
+		return this.authService.login(dto);
 	}
 }
