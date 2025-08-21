@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AuthController } from '../src/auth/auth.controller';
-import { AuthService } from '../src/auth/auth.service';
+import { AuthService } from '../src/auth/services/auth.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 
 describe('AuthController (e2e)', () => {

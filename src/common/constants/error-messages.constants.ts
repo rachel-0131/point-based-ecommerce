@@ -1,4 +1,4 @@
-export const ORDER_ERROR_MESSAGES = {
+export const ERROR_MESSAGES = {
 	USER_NOT_FOUND: '사용자를 찾을 수 없습니다',
 	PRODUCT_NOT_FOUND: '상품을 찾을 수 없습니다',
 	INSUFFICIENT_POINTS: '포인트가 부족합니다',

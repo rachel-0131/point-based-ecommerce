@@ -25,7 +25,7 @@ import { User } from '../common/interfaces/user.interface';
 
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { ORDER_ERROR_MESSAGES } from './constants/error-messages.constants';
+import { ERROR_MESSAGES } from '../common/constants/error-messages.constants';
 
 @ApiTags('orders')
 @Controller('orders')
@@ -63,9 +63,7 @@ export class OrdersController {
 		@CurrentUser() user: User,
 	) {
 		if (user.id !== user_id) {
-			throw new ForbiddenException(
-				ORDER_ERROR_MESSAGES.ORDER_ACCESS_DENIED,
-			);
+			throw new ForbiddenException(ERROR_MESSAGES.ORDER_ACCESS_DENIED);
 		}
 		return this.ordersService.findByUserId(user_id);
 	}
