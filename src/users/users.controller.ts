@@ -37,6 +37,26 @@ export class UsersController {
 		return this.usersService.create(createUserDto);
 	}
 
+	@Get('profile')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: '프로필 조회' })
+	@ApiResponse({
+		status: 200,
+		description: '프로필 조회 성공',
+		schema: {
+			example: {
+				id: 1,
+				email: 'user@example.com',
+				name: '홍길동',
+				point: 1500,
+			},
+		},
+	})
+	async getProfile(@CurrentUser() user: any) {
+		return this.usersService.findOne(user.id);
+	}
+
 	@Get(':id')
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth()
@@ -98,25 +118,5 @@ export class UsersController {
 	})
 	async getPointHistory(@Param('id', ParseIntPipe) id: number) {
 		return this.usersService.getPointHistory(id);
-	}
-
-	@Get('profile')
-	@UseGuards(JwtAuthGuard)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: '프로필 조회' })
-	@ApiResponse({
-		status: 200,
-		description: '프로필 조회 성공',
-		schema: {
-			example: {
-				id: 1,
-				email: 'user@example.com',
-				name: '홍길동',
-				point: 1500,
-			},
-		},
-	})
-	async getProfile(@CurrentUser() user: any) {
-		return this.usersService.findOne(user.id);
 	}
 }

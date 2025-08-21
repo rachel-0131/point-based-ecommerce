@@ -22,7 +22,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
 		try {
 			const payload = this.jwt_service.verify(token);
-			request['user'] = payload;
+			request['user'] = { id: payload.sub, ...payload };
 		} catch (error) {
 			if (error.name === 'TokenExpiredError') {
 				throw new UnauthorizedException('토큰이 만료되었습니다');
