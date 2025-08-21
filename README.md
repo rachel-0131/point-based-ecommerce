@@ -114,6 +114,27 @@ npm run build
 npm run start:prod
 ```
 
+## API 명세 (Swagger)
+
+애플리케이션이 실행된 후 Swagger UI를 통해 API 문서를 확인할 수 있습니다.
+
+### 접속 방법
+- 로컬: http://localhost:3000/api
+- Docker Compose 실행 시: http://localhost:3000/api
+
+### 주요 API 엔드포인트
+- **인증**: `/auth/login`, `/auth/register`
+- **사용자**: `/users` (사용자 정보, 포인트 충전 등)
+- **상품**: `/products` (상품 목록, 검색 등)
+- **관리자 상품**: `/admin/products` (상품 등록, 수정, 삭제)
+- **주문**: `/orders` (주문 생성, 조회 등)
+
+### 인증 방법
+Swagger UI에서 Bearer Token 인증을 사용합니다:
+1. `/auth/login`으로 로그인 후 JWT 토큰 획득
+2. Swagger UI 상단의 "Authorize" 버튼 클릭
+3. `Bearer {토큰}` 형식으로 입력
+
 ## 테스트
 
 ### E2E 테스트
