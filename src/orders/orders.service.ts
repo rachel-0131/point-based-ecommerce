@@ -7,7 +7,7 @@ import {
 	InsufficientStockException,
 	UserNotFoundException,
 	ProductNotFoundException,
-} from './exceptions/order.exceptions';
+} from '../common/exceptions/all-exceptions';
 
 @Injectable()
 export class OrdersService {

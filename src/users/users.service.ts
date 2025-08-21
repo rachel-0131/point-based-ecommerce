@@ -13,6 +13,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { ChargePointDto } from './dto/charge-point.dto';
+import { UserNotFoundException } from '../common/exceptions/all-exceptions';
 
 @Injectable()
 export class UsersService {
@@ -60,7 +61,7 @@ export class UsersService {
 		});
 
 		if (!user) {
-			throw new NotFoundException(`User with ID ${id} not found`);
+			throw new UserNotFoundException();
 		}
 
 		return user;
@@ -72,7 +73,7 @@ export class UsersService {
 		});
 
 		if (!user) {
-			throw new NotFoundException(`User with ID ${user_id} not found`);
+			throw new UserNotFoundException();
 		}
 
 		const result = await this.prisma.$transaction(async (tx) => {
@@ -109,7 +110,7 @@ export class UsersService {
 		});
 
 		if (!user) {
-			throw new NotFoundException(`User with ID ${user_id} not found`);
+			throw new UserNotFoundException();
 		}
 
 		const { page = 1, limit = 10 } = dto;

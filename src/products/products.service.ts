@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { OffsetPaginationDto } from '../common/dto/offset-pagination.dto';
 import { PaginatedResponse } from '../common/interfaces/api-response.interface';
@@ -6,6 +6,7 @@ import { PaginationUtil } from '../common/utils/pagination.util';
 import { PrismaService } from '../prisma/prisma.service';
 
 import { CreateProductDto } from './dto/create-product.dto';
+import { ProductNotFoundException } from '../common/exceptions/all-exceptions';
 
 @Injectable()
 export class ProductsService {
@@ -74,7 +75,7 @@ export class ProductsService {
 
 		// 상품이 존재하지 않는 경우 예외 처리
 		if (!product) {
-			throw new NotFoundException(`Product with ID ${id} not found`);
+			throw new ProductNotFoundException();
 		}
 
 		return {
