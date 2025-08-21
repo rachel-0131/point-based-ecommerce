@@ -11,15 +11,21 @@ import {
 import {
 	ApiTags,
 	ApiOperation,
-	ApiResponse,
 	ApiBearerAuth,
 } from '@nestjs/swagger';
+
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import {
+	StandardApiResponse,
+	ErrorApiResponse,
+} from '../common/decorators/api-response.decorator';
+import { OffsetPaginationDto } from '../common/dto/offset-pagination.dto';
+import { User } from '../common/interfaces/user.interface';
+
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ChargePointDto } from './dto/charge-point.dto';
-import { OffsetPaginationDto } from '../common/dto/offset-pagination.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -28,13 +34,9 @@ export class UsersController {
 
 	@Post()
 	@ApiOperation({ summary: '회원 가입' })
-	@ApiResponse({
-		status: 201,
-		description: '회원 가입 성공',
-		schema: {
-			example: { id: 1, email: 'user@example.com', name: '홍길동' },
-		},
-	})
+	@StandardApiResponse(201, '회원 가입 성공')
+	@ErrorApiResponse(409, '이미 존재하는 이메일')
+	@ErrorApiResponse(400, '잘못된 요청 데이터')
 	async create(@Body() dto: CreateUserDto) {
 		return this.usersService.create(dto);
 	}
@@ -43,19 +45,10 @@ export class UsersController {
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: '프로필 조회' })
-	@ApiResponse({
-		status: 200,
-		description: '프로필 조회 성공',
-		schema: {
-			example: {
-				id: 1,
-				email: 'user@example.com',
-				name: '홍길동',
-				point: 1500,
-			},
-		},
-	})
-	async getProfile(@CurrentUser() user: any) {
+	@StandardApiResponse(200, '프로필 조회 성공')
+	@ErrorApiResponse(401, '인증되지 않은 사용자')
+	@ErrorApiResponse(404, '사용자를 찾을 수 없음')
+	async getProfile(@CurrentUser() user: User) {
 		return this.usersService.findOne(user.id);
 	}
 
@@ -63,13 +56,9 @@ export class UsersController {
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: '회원 조회' })
-	@ApiResponse({
-		status: 200,
-		description: '회원 조회 성공',
-		schema: {
-			example: { id: 1, name: '홍길동', point: 1000 },
-		},
-	})
+	@StandardApiResponse(200, '회원 조회 성공')
+	@ErrorApiResponse(401, '인증되지 않은 사용자')
+	@ErrorApiResponse(404, '사용자를 찾을 수 없음')
 	async findOne(@Param('id', ParseIntPipe) id: number) {
 		return this.usersService.findOne(id);
 	}
@@ -78,13 +67,10 @@ export class UsersController {
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: '포인트 충전' })
-	@ApiResponse({
-		status: 200,
-		description: '포인트 충전 성공',
-		schema: {
-			example: { point: 2000 },
-		},
-	})
+	@StandardApiResponse(200, '포인트 충전 성공')
+	@ErrorApiResponse(401, '인증되지 않은 사용자')
+	@ErrorApiResponse(404, '사용자를 찾을 수 없음')
+	@ErrorApiResponse(400, '잘못된 충전 금액')
 	async chargePoint(
 		@Param('id', ParseIntPipe) id: number,
 		@Body() dto: ChargePointDto,
@@ -96,38 +82,9 @@ export class UsersController {
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: '포인트 내역 조회' })
-	@ApiResponse({
-		status: 200,
-		description: '포인트 내역 조회 성공',
-		schema: {
-			example: {
-				success: true,
-				data: [
-					{
-						id: 1,
-						amount: 1000,
-						type: 'CHARGE',
-						description: '포인트 충전',
-						created_at: '2025-08-19T12:00:00.000Z',
-					},
-					{
-						id: 2,
-						amount: -500,
-						type: 'USE',
-						description: '상품 구매 (주문 ID: 1)',
-						created_at: '2025-08-19T12:30:00.000Z',
-					},
-				],
-				pagination: {
-					page: 1,
-					limit: 10,
-					total: 2,
-					total_pages: 1,
-				},
-				timestamp: '2025-08-21T00:00:00.000Z',
-			},
-		},
-	})
+	@StandardApiResponse(200, '포인트 내역 조회 성공')
+	@ErrorApiResponse(401, '인증되지 않은 사용자')
+	@ErrorApiResponse(404, '사용자를 찾을 수 없음')
 	async getPointHistory(
 		@Param('id', ParseIntPipe) id: number,
 		@Query() dto: OffsetPaginationDto,

@@ -3,34 +3,41 @@ import {
 	NotFoundException,
 	ConflictException,
 } from '@nestjs/common';
+import { PointType } from '@prisma/client';
+
+import { PasswordService } from '../auth/services/password.service';
+import { OffsetPaginationDto } from '../common/dto/offset-pagination.dto';
+import { PaginatedResponse } from '../common/interfaces/api-response.interface';
+import { PaginationUtil } from '../common/utils/pagination.util';
 import { PrismaService } from '../prisma/prisma.service';
+
 import { CreateUserDto } from './dto/create-user.dto';
 import { ChargePointDto } from './dto/charge-point.dto';
-import { OffsetPaginationDto } from '../common/dto/offset-pagination.dto';
-import { PaginationUtil } from '../common/utils/pagination.util';
-import { PaginatedResponse } from '../common/interfaces/api-response.interface';
-import { PointType } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		private readonly passwordService: PasswordService,
+	) {}
 
 	async create(dto: CreateUserDto) {
-		const existingUser = await this.prisma.user.findUnique({
+		const existing_user = await this.prisma.user.findUnique({
 			where: { email: dto.email },
 		});
 
-		if (existingUser) {
+		if (existing_user) {
 			throw new ConflictException('이미 존재하는 이메일입니다');
 		}
 
-		const hashedPassword = await bcrypt.hash(dto.password, 12);
+		const hashed_password = await this.passwordService.hashPassword(
+			dto.password,
+		);
 
 		return this.prisma.user.create({
 			data: {
 				email: dto.email,
-				password: hashedPassword,
+				password: hashed_password,
 				name: dto.name,
 			},
 			select: {
@@ -125,7 +132,7 @@ export class UsersService {
 			}),
 		]);
 
-		const formattedHistory = history.map((item) => ({
+		const formatted_history = history.map((item) => ({
 			id: item.id,
 			amount: item.amount,
 			type: item.type,
@@ -134,7 +141,7 @@ export class UsersService {
 		}));
 
 		return PaginationUtil.createPaginatedResponse(
-			formattedHistory,
+			formatted_history,
 			total,
 			page,
 			limit,

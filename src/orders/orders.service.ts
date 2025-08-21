@@ -43,7 +43,7 @@ export class OrdersService {
 			}
 
 			// 재고 검증과 동시에 원자적 업데이트
-			const updatedProduct = await tx.product.updateMany({
+			const updated_product = await tx.product.updateMany({
 				where: {
 					id: dto.product_id,
 					stock: { gte: quantity },
@@ -56,7 +56,7 @@ export class OrdersService {
 			});
 
 			// 업데이트된 행이 없으면 재고 부족
-			if (updatedProduct.count === 0) {
+			if (updated_product.count === 0) {
 				throw new InsufficientStockException();
 			}
 
