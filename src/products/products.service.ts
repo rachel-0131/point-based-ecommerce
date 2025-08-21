@@ -1,9 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateProductDto } from './dto/create-product.dto';
+
 import { OffsetPaginationDto } from '../common/dto/offset-pagination.dto';
-import { PaginationUtil } from '../common/utils/pagination.util';
 import { PaginatedResponse } from '../common/interfaces/api-response.interface';
+import { PaginationUtil } from '../common/utils/pagination.util';
+import { PrismaService } from '../prisma/prisma.service';
+
+import { CreateProductDto } from './dto/create-product.dto';
 
 @Injectable()
 export class ProductsService {
@@ -46,13 +48,13 @@ export class ProductsService {
 			this.prisma.product.count(),
 		]);
 
-		const formattedProducts = products.map((product) => ({
+		const formatted_products = products.map((product) => ({
 			...product,
 			is_sold_out: product.stock <= 0,
 		}));
 
 		return PaginationUtil.createPaginatedResponse(
-			formattedProducts,
+			formatted_products,
 			total,
 			page,
 			limit,
