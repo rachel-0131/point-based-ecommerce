@@ -5,7 +5,7 @@ export interface ApiResponse<T = any> {
 	timestamp: string;
 }
 
-export interface PaginatedResponse<T = any> extends ApiResponse<T[]> {
+export interface OffsetPaginatedResponse<T = any> extends ApiResponse<T[]> {
 	pagination: {
 		page: number;
 		limit: number;
@@ -13,3 +13,16 @@ export interface PaginatedResponse<T = any> extends ApiResponse<T[]> {
 		total_pages: number;
 	};
 }
+
+export interface CursorPaginatedResponse<T = any> extends ApiResponse<T[]> {
+	pagination: {
+		limit: number;
+		has_next: boolean;
+		has_previous: boolean;
+		next_cursor?: string;
+		previous_cursor?: string;
+	};
+}
+
+// 기존 호환성을 위한 alias
+export interface PaginatedResponse<T = any> extends OffsetPaginatedResponse<T> {}

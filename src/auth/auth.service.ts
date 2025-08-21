@@ -17,9 +17,9 @@ export class AuthService {
 		private readonly password_service: PasswordService,
 	) {}
 
-	async register(registerDto: RegisterDto) {
+	async register(dto: RegisterDto) {
 		const existing_user = await this.prisma.user.findUnique({
-			where: { email: registerDto.email },
+			where: { email: dto.email },
 		});
 
 		if (existing_user) {
@@ -27,14 +27,14 @@ export class AuthService {
 		}
 
 		const hashed_password = await this.password_service.hashPassword(
-			registerDto.password,
+			dto.password,
 		);
 
 		const user = await this.prisma.user.create({
 			data: {
-				email: registerDto.email,
+				email: dto.email,
 				password: hashed_password,
-				name: registerDto.name,
+				name: dto.name,
 			},
 			select: {
 				id: true,
@@ -46,9 +46,9 @@ export class AuthService {
 		return user;
 	}
 
-	async login(loginDto: LoginDto) {
+	async login(dto: LoginDto) {
 		const user = await this.prisma.user.findUnique({
-			where: { email: loginDto.email },
+			where: { email: dto.email },
 		});
 
 		if (!user) {
@@ -58,7 +58,7 @@ export class AuthService {
 		}
 
 		const is_password_valid = await this.password_service.comparePassword(
-			loginDto.password,
+			dto.password,
 			user.password,
 		);
 

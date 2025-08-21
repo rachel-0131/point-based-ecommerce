@@ -25,7 +25,7 @@ export class AdminProductsController {
 			example: { id: 1 },
 		},
 	})
-	async create(@Body() create_product_dto: CreateProductDto) {
-		return this.productsService.create(create_product_dto);
+	async create(@Body() dto: CreateProductDto) {
+		return this.productsService.create(dto);
 	}
 }

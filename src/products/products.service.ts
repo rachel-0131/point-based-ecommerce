@@ -1,17 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
+import { OffsetPaginationDto } from '../common/dto/offset-pagination.dto';
+import { PaginationUtil } from '../common/utils/pagination.util';
+import { PaginatedResponse } from '../common/interfaces/api-response.interface';
 
 @Injectable()
 export class ProductsService {
 	constructor(private readonly prisma: PrismaService) {}
 
-	async create(create_product_dto: CreateProductDto) {
+	async create(dto: CreateProductDto) {
 		return this.prisma.product.create({
 			data: {
-				name: create_product_dto.name,
-				price: create_product_dto.price,
-				stock: create_product_dto.stock || 0,
+				name: dto.name,
+				price: dto.price,
+				stock: dto.stock || 0,
 			},
 			select: {
 				id: true,
@@ -19,23 +22,41 @@ export class ProductsService {
 		});
 	}
 
-	async findAll() {
-		const products = await this.prisma.product.findMany({
-			select: {
-				id: true,
-				name: true,
-				price: true,
-				stock: true,
-			},
-			orderBy: {
-				id: 'desc', // 최근 등록된 상품이 먼저 나오도록 정렬
-			},
+	async findAll(dto: OffsetPaginationDto): Promise<PaginatedResponse<any>> {
+		const { page = 1, limit = 10 } = dto;
+		const { skip, take } = PaginationUtil.calculatePagination({
+			page,
+			limit,
 		});
 
-		return products.map((product) => ({
+		const [products, total] = await Promise.all([
+			this.prisma.product.findMany({
+				select: {
+					id: true,
+					name: true,
+					price: true,
+					stock: true,
+				},
+				orderBy: {
+					id: 'desc',
+				},
+				skip,
+				take,
+			}),
+			this.prisma.product.count(),
+		]);
+
+		const formattedProducts = products.map((product) => ({
 			...product,
-			is_sold_out: product.stock <= 0, // 품절 여부 추가
+			is_sold_out: product.stock <= 0,
 		}));
+
+		return PaginationUtil.createPaginatedResponse(
+			formattedProducts,
+			total,
+			page,
+			limit,
+		);
 	}
 
 	async findOne(id: number) {

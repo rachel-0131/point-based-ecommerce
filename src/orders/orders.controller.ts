@@ -37,8 +37,8 @@ export class OrdersController {
 			example: { order_id: 1 },
 		},
 	})
-	async create(@Body() create_order_dto: CreateOrderDto) {
-		return this.ordersService.create(create_order_dto);
+	async create(@Body() dto: CreateOrderDto) {
+		return this.ordersService.create(dto);
 	}
 
 	@Get()
@@ -62,7 +62,9 @@ export class OrdersController {
 		@CurrentUser() user: any,
 	) {
 		if (user.id !== user_id) {
-			throw new ForbiddenException(ORDER_ERROR_MESSAGES.ORDER_ACCESS_DENIED);
+			throw new ForbiddenException(
+				ORDER_ERROR_MESSAGES.ORDER_ACCESS_DENIED,
+			);
 		}
 		return this.ordersService.findByUserId(user_id);
 	}
