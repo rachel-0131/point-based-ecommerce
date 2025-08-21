@@ -437,9 +437,9 @@ describe('UsersController (e2e)', () => {
       };
 
       // Mock JwtAuthGuard의 request.user를 시뮬레이션
-      const mockRequest = {
-        user: { id: 1 },
-      };
+      const _mock_request = {
+			user: { id: 1 },
+		};
 
       mock_usersService.findOne.mockResolvedValue(mock_user);
 
@@ -452,9 +452,9 @@ describe('UsersController (e2e)', () => {
     });
 
     it('should fail when user is not found', () => {
-      const mockRequest = {
-        user: { id: 999 },
-      };
+      const _mock_request = {
+			user: { id: 999 },
+		};
 
       mock_usersService.findOne.mockRejectedValue(
         new Error('User with ID 999 not found'),
