@@ -5,7 +5,7 @@ import { AdminProductsController } from '../src/products/admin-products.controll
 import { ProductsService } from '../src/products/products.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 
-describe('AdminProductsController (e2e)', () => {
+describe('관리자 상품 컨트롤러 (e2e)', () => {
   let app: INestApplication;
   let mockProductsService: jest.Mocked<ProductsService>;
   let mockPrismaService: jest.Mocked<Partial<PrismaService>>;
@@ -50,7 +50,7 @@ describe('AdminProductsController (e2e)', () => {
   });
 
   describe('/admin/products (POST)', () => {
-    it('should create a new product successfully', () => {
+    it('새 상품을 성공적으로 생성합니다', () => {
       const create_product_dto = {
         name: '테스트 상품',
         price: 1000,

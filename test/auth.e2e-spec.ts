@@ -5,7 +5,7 @@ import { AuthController } from '../src/auth/auth.controller';
 import { AuthService } from '../src/auth/services/auth.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 
-describe('AuthController (e2e)', () => {
+describe('인증 컨트롤러 (e2e)', () => {
   let app: INestApplication;
   let mockAuthService: jest.Mocked<AuthService>;
   let mockPrismaService: jest.Mocked<Partial<PrismaService>>;
@@ -51,7 +51,7 @@ describe('AuthController (e2e)', () => {
   });
 
   describe('/auth/register (POST)', () => {
-    it('should register a new user successfully', () => {
+    it('새 사용자를 성공적으로 등록합니다', () => {
       const register_dto = {
         email: 'test@example.com',
         password: 'Password123!',
@@ -223,7 +223,7 @@ describe('AuthController (e2e)', () => {
   });
 
   describe('/auth/login (POST)', () => {
-    it('should login successfully', () => {
+    it('성공적으로 로그인합니다', () => {
       const login_dto = {
         email: 'test@example.com',
         password: 'Password123!',
