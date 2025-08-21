@@ -25,4 +25,4 @@ export interface CursorPaginatedResponse<T = any> extends ApiResponse<T[]> {
 }
 
 // 기존 호환성을 위한 alias
-export interface PaginatedResponse<T = any> extends OffsetPaginatedResponse<T> {}
+export type PaginatedResponse<T = any> = OffsetPaginatedResponse<T>;

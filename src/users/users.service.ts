@@ -1,6 +1,5 @@
 import {
 	Injectable,
-	NotFoundException,
 	ConflictException,
 } from '@nestjs/common';
 import { PointType } from '@prisma/client';

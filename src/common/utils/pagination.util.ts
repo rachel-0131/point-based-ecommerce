@@ -1,7 +1,6 @@
 import { 
 	OffsetPaginatedResponse, 
-	CursorPaginatedResponse,
-	PaginatedResponse 
+	CursorPaginatedResponse
 } from '../interfaces/api-response.interface';
 
 export interface OffsetPaginationOptions {
@@ -95,7 +94,7 @@ export class PaginationUtil {
 		data: T[],
 		limit: number,
 		cursorField: string = 'id',
-		direction: 'asc' | 'desc' = 'desc'
+		_direction: 'asc' | 'desc' = 'desc'
 	): CursorPaginatedResponse<T> {
 		const has_next = data.length > limit;
 		const actualData = has_next ? data.slice(0, limit) : data;
